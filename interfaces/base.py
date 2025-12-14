@@ -181,46 +181,46 @@ class TextBase(object):
                     # if is dir, we need to initialize the model list
                     if os.path.isdir(resume):
                         print("resume:", resume)
+                        # Tambahkan map_location=torch.device('cpu')
                         model_dict = torch.load(
-                                os.path.join(resume, "model_best_acc_" + str(iter) + ".pth")
+                                os.path.join(resume, "model_best_acc_" + str(iter) + ".pth"),
+                                map_location=torch.device('cpu')
                             )['state_dict_G']
-                        # print("model_dict:", model_dict.keys())
-
+                        
                         old_state_dict = model_dict
                         new_state_dict = model.state_dict()
 
-                        # for key in old_state_dict:
-                        #for new_key in new_state_dict:
-                        #    old_keys = list(old_state_dict.keys())
-
-                        #    if not new_key in old_keys:
-                        #        print("new_key:", new_key)
-
-
-                        model.load_state_dict(
-                            model_dict
-                        , strict=True)
-
-
+                        model.load_state_dict(model_dict, strict=True)
 
                     else:
-                        loaded_state_dict = torch.load(resume)
+                        # --- PERBAIKAN UTAMA DI SINI ---
+                        # 1. Load file sekali saja ke CPU
+                        loaded_state_dict = torch.load(resume, map_location=torch.device('cpu'))
+                        
+                        # 2. Gunakan variabel 'loaded_state_dict', JANGAN panggil torch.load() lagi
                         if 'state_dict_G' in loaded_state_dict:
-                            model.load_state_dict(torch.load(resume)['state_dict_G'])
+                            model.load_state_dict(loaded_state_dict['state_dict_G'])
                         else:
-                            model.load_state_dict(torch.load(resume))
+                            model.load_state_dict(loaded_state_dict)
+
                 else:
+                    # Bagian else (Multi-GPU), sesuaikan juga ke CPU
                     model_dict = torch.load(
-                        os.path.join(resume, "model_best_acc_" + str(iter) + ".pth")
+                        os.path.join(resume, "model_best_acc_" + str(iter) + ".pth"),
+                        map_location=torch.device('cpu')
                     )['state_dict_G']
 
                     if os.path.isdir(resume):
                         model.load_state_dict(
-                            {'module.' + k: v for k, v in model_dict.items()}
-                            , strict=False)
+                            {'module.' + k: v for k, v in model_dict.items()}, 
+                            strict=False
+                        )
                     else:
+                        # Load original resume with map_location
+                        tmp_load = torch.load(resume, map_location=torch.device('cpu'))['state_dict_G']
                         model.load_state_dict(
-                        {'module.' + k: v for k, v in torch.load(resume)['state_dict_G'].items()})
+                            {'module.' + k: v for k, v in tmp_load.items()}
+                        )
         return {'model': model, 'crit': image_crit}
 
     def global_model_init(self, iter=-1):

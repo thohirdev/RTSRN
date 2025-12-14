@@ -1,0 +1,14 @@
+torch
+torchvision
+pyyaml
+ipython
+easydict
+scikit-image
+matplotlib
+tensorboardX
+tqdm
+lmdb
+opencv-python
+thop
+ptflops
+editdistance
