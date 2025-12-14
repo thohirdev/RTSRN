@@ -1486,7 +1486,10 @@ class TextSR(base.TextBase):
                 preds_size = torch.IntTensor([crnn_output_lr.size(0)] * val_batch_size)
                 pred_str_lr = self.converter_crnn.decode(preds_lr.data, preds_size.data, raw=False)
             
-            print(f"File: {im_name} | LR: {pred_str_lr[0]} ===> SR: {pred_str_sr[0]}")
+            val_lr = pred_str_lr[0] if isinstance(pred_str_lr, list) else pred_str_lr
+            val_sr = pred_str_sr[0] if isinstance(pred_str_sr, list) else pred_str_sr
+
+            print(f"File: {im_name} | LR: {val_lr} ===> SR: {val_sr}")
             
             try:
                 # Ambil 3 channel saja (RGB), buang mask
@@ -1498,10 +1501,10 @@ class TextSR(base.TextBase):
                 img_sr_save = torch.nn.functional.interpolate(img_sr_save, size=(32, 128), mode='bicubic')
 
                 # Gabung Kiri-Kanan
-                img_concat = torch.cat((img_lr_save, img_sr_save), dim=3) # dim 3 = width
+                #img_concat = torch.cat((img_lr_save, img_sr_save), dim=3) # dim 3 = width
                 
                 save_path = os.path.join(output_dir, f"compare_{im_name}")
-                torchvision.utils.save_image(img_concat, save_path, padding=0)
+                torchvision.utils.save_image(img_sr_save, save_path, padding=0)
             except Exception as e:
                 print(f"Gagal menyimpan gambar: {e}")
 
