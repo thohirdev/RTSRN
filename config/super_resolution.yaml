@@ -4,20 +4,20 @@ MODEL:
 TRAIN:
   train_data_dir: [
     './textzoom/train1',
-    #'./textzoom/train2',
+    './textzoom/train2',
     # '/data0_ssd2t/majianqi/cute80_288/',
     # '/data0_ssd2t/majianqi/NIPS2014',
     # '/data1_ssd4t/majianqi/CVPR2016',
     # "/data0_ssd2t/majianqi/video_seq"
   ]
-  batch_size: 16
+  batch_size: 64
   width: 128
   height: 32
   epochs: 30
   cuda: False
   ngpu: 1
   workers: 0
-  resume: ''
+  resume: './ckpt/demo/model_best_acc_500.pth'
   ckpt_dir: './ckpt/with_test'
   voc_type: 'all' #'digits lower upper all'
   saveInterval: 1200 # 200
